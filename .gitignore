@@ -2,3 +2,5 @@
 .idea/
 .terraform/
 init/terraform.tfstate.backup
+*.tfstate
+*.tfstate.backup
