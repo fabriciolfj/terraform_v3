@@ -1,0 +1,4 @@
+
+.idea/
+.terraform/
+init/terraform.tfstate.backup
