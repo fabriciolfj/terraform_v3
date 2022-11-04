@@ -55,3 +55,8 @@ resource "aws_autoscaling_group" "example" {
 - mantem os registros dos recursos criados na nuvem
 - compara com os recursos reais com os recursos registrados, afim de determinar quais alterações precisam ser aplicadas
 - ideal que fique armazenado em um ambiente compartilhado, bloqueado/isolado.
+
+### terraform backend-remote
+- da suporte ao tfstate do terraform
+- afim de suprir as situação salientadas acima
+- por exemplo: podemos guardar em um s3 o arquivo de estado.
