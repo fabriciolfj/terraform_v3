@@ -8,3 +8,8 @@ variable "server_port" {
 #  value = aws_instance.example.public_ip
 #  description = "ip publico do webserver"
 #}
+
+output "alb_dns_name" {
+  value = aws_lb.example.dns_name
+  description = "o dominio do load balaancer"
+}
