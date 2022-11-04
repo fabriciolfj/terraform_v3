@@ -60,3 +60,10 @@ resource "aws_autoscaling_group" "example" {
 - da suporte ao tfstate do terraform
 - afim de suprir as situação salientadas acima
 - por exemplo: podemos guardar em um s3 o arquivo de estado.
+
+#### Detalhes do s3 que atende o backend-remote
+- criamos um bucket
+- configuramos o mesmo para versionamento, caso mudamos o nosso tfstate
+- encriptmos seu armazenamento, via aws_s3_bucket_server_side_encryption_configuration
+- podemos bloquear o acesso publico
+- criamos uma tabela dynamodb para efetuar o lock do arquivo (evitar concorrência), ou seja, se você dar um apply e em seguida outro dev executar tambem um apply, ele esperará o seu comando concluir, para em seguida iniciar o dele.
