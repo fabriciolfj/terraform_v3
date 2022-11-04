@@ -20,3 +20,32 @@ data "aws_subnets" "default" {
   }
 }
 ```
+
+## Implantando um loadbalance de exemplo
+- loadbalance e dividido em 3 partes:
+  - ouvinte
+  - regras do ouvindo
+  - gropo alvo
+- em uma ordem de recursos, o elb apontando para um auto scaling group (asg), seria:
+  - aws_lb (criação do elb)
+  - aws_lb_listener (ouvinte) 
+  - aws_lb_listener_rule (regras)
+  - aws_lb_target_group (grupo de destino)
+  - por fim, vincular ao asg:
+````
+resource "aws_autoscaling_group" "example" {
+  launch_configuration = aws_launch_configuration.example.name
+  vpc_zone_identifier = data.aws_subnets.default.ids
+
+  target_group_arns = [aws_lb_target_group.asg.arn]
+  health_check_type = "ELB"
+
+  max_size = 10
+  min_size = 2
+
+  tag {
+    key                 = "Name"
+    propagate_at_launch = true
+    value               = "terraform-asg-example"
+  }
+}
