@@ -49,3 +49,9 @@ resource "aws_autoscaling_group" "example" {
     value               = "terraform-asg-example"
   }
 }
+`````
+
+## Estado terraform
+- mantem os registros dos recursos criados na nuvem
+- compara com os recursos reais com os recursos registrados, afim de determinar quais alterações precisam ser aplicadas
+- ideal que fique armazenado em um ambiente compartilhado, bloqueado/isolado.
