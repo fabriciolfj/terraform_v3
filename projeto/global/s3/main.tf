@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "fabricio-terraform"
+  bucket = "fabricio211-terraform"
 
   #da um erro ao tentar destruir  esse recurso
   #lifecycle {
@@ -52,7 +52,7 @@ resource "aws_dynamodb_table" "terraform_locks" {
 terraform {
   backend "s3" {
     # Replace this with your bucket name!
-    bucket         = "fabricio-terraform"
+    bucket         = "fabricio211-terraform"
     key            = "global/s3/terraform.tfstate"
     region         = "us-east-2"
 

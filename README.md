@@ -67,3 +67,81 @@ resource "aws_autoscaling_group" "example" {
 - encriptmos seu armazenamento, via aws_s3_bucket_server_side_encryption_configuration
 - podemos bloquear o acesso publico
 - criamos uma tabela dynamodb para efetuar o lock do arquivo (evitar concorrência), ou seja, se você dar um apply e em seguida outro dev executar tambem um apply, ele esperará o seu comando concluir, para em seguida iniciar o dele.
+- apos os procedimentos acima, crie um arquivo do backend conforme abaixo, e siga com os comandos no terraform:
+```
+terraform {
+  backend "s3" {
+    # Replace this with your bucket name!
+    bucket         = "fabricio211-terraform"
+    key            = "global/s3/terraform.tfstate"
+    region         = "us-east-2"
+
+    # Replace this with your DynamoDB table name!
+    dynamodb_table = "terraform-up-and-running-locks"
+    encrypt        = true
+  }
+}
+```
+- uma limitação do backend está no uso de variáveis, onde não é permitido.
+- outro ponto, quando se trabalha com módulos, devemos possuir um backend para cada módulo e este com key diferente entre si.
+
+### Isolamento
+- não podemos deixar toda a configuração em apenas um arquivo no terraform
+- e cada ambiente ter sua configuração separada
+- existem 2 meios, via workspace e layout de arquivo
+
+#### workspace
+- quando não especificado, os recursos são criados no workspace padrão
+- os workspaces são isolados uns dos outros
+- para mostrar o workspace, executamos o comando abaixo:
+```
+terraform workspace show
+```
+- para criar um novo workspace, executamos:
+```
+terraform workspace new example1
+```
+- para selecionar
+```
+terraform workspace list
+terraform select example1
+```
+
+# A fonte de dados terraform_remote_state
+- quando precisamos utilizar como fonte de dados, outro arquivo de estado terraform
+- no exemplo abaixo, estamos utilizando o tfstate do recurso do banco de dados
+```
+data "terraform_remote_state" "db" {
+  backend = "s3"
+
+  config = {
+    bucket = "terraform-up-and-running-state"
+    key    = "stage/data-stores/mysql/terraform.tfstate"
+    region = "us-east-2"
+  }
+}
+```
+- em seguida utilizando-o
+```
+  user_data = templatefile("user-data.sh", {
+              server_port = var.server_port
+              db_address  = data.terraform_remote_state.db.outputs.address
+              db_port     = data.terraform_remote_state.db.outputs.port
+              })
+```
+
+## Dados sensíveis
+- podemos passar valores de variávies de ambiente, desde que tenha o prefixo TF_VAR_nome da variavel configurada
+- por exemplo:
+```
+variable "db_username" {
+  description = "The username for the database"
+  type        = string
+  sensitive   = true
+}
+```
+- para passar uma variável de ambiente para essa variavel seria:
+```
+$ export TF_VAR_db_username="root"
+```
+- o local aonde a variável e referenciada, não muda.
