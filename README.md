@@ -145,3 +145,54 @@ variable "db_username" {
 $ export TF_VAR_db_username="root"
 ```
 - o local aonde a variável e referenciada, não muda.
+
+## Módulos
+- caso queira reutilizar algum código no terraform, façamos o uso de módulos
+- aonde colocamos nosso código de infra dentro deles, e podemos reutilizar em diversos ambientes.
+- módulo consiste em arquivos de configurações do terraform, que podem ser referenciados
+
+### Modificando módulos
+- podemos passar variáveis como parâmetros, para que o módulo atenda o ambiente 
+- caso queria utilizar variável no módulo, e não quer que seja modificada, use variavéis locais
+
+### Dicas
+- sempre evite blocos embutidos, no exemplo abaixo apartamos as regras de entrada e saida do security group.
+```
+resource "aws_security_group" "alb" {
+  name = "${var.cluster_name}-alb"
+}
+
+resource "aws_security_group_rule" "allow_http_inbound" {
+  type              = "ingress"
+  security_group_id = aws_security_group.alb.id
+
+  from_port   = local.http_port
+  to_port     = local.http_port
+  protocol    = local.tcp_protocol
+  cidr_blocks = local.all_ips
+}
+
+resource "aws_security_group_rule" "allow_all_outbound" {
+  type              = "egress"
+  security_group_id = aws_security_group.alb.id
+
+  from_port   = local.any_port
+  to_port     = local.any_port
+  protocol    = local.any_protocol
+  cidr_blocks = local.all_ips
+}
+```
+- caso no módulo esteja utilizando o templatefile, faça uso o path.modulo para atender a relatividade do caminho do arquivo.
+```
+  user_data = templatefile("${path.module}/user-data.sh", {
+    server_port = var.server_port
+    db_address  = data.terraform_remote_state.db.outputs.address
+    db_port     = data.terraform_remote_state.db.outputs.port
+  })
+```
+- para fazer uso de algum id ou valor do módulo, utilize a sintaxe abaixo:
+```
+  autoscaling_group_name = module.webserver_cluster.asg_name
+```
+
+## Module Versioning

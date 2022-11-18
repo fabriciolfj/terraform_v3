@@ -1,7 +1,3 @@
-provider "aws" {
-  region = "us-east-2"
-}
-
 resource "aws_db_instance" "example" {
   identifier_prefix   = "terraform-up-and-running"
   engine              = "mysql"
@@ -18,7 +14,7 @@ resource "aws_db_instance" "example" {
 terraform {
   backend "s3" {
     # Replace this with your bucket name!
-    bucket         = "terraform-up-and-running-state"
+    bucket         = "fabricio211-terraform"
     key            = "stage/data-stores/mysql/terraform.tfstate"
     region         = "us-east-2"
 
