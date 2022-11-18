@@ -149,7 +149,21 @@ $ export TF_VAR_db_username="root"
 ## Módulos
 - caso queira reutilizar algum código no terraform, façamos o uso de módulos
 - aonde colocamos nosso código de infra dentro deles, e podemos reutilizar em diversos ambientes.
-- módulo consiste em arquivos de configurações do terraform, que podem ser referenciados
+- módulo consiste em arquivos de configurações do terraform, que podem ser referenciados, conforme abaixo:
+```
+module "webserver_cluster" {
+  source = "../../../modules/services/webserver-cluster" (referenciado)
+
+  (abaixo sao os parametros)
+  cluster_name = "webservers-stage"
+  db_remote_state_bucket = "fabricio211-terraform"
+  db_remote_state_key = "stage/data-stores/mysql/terraform.tfstate"
+
+  instance_type = "t2.micro"
+  min_size = 2
+  max_size = 3
+}
+```
 
 ### Modificando módulos
 - podemos passar variáveis como parâmetros, para que o módulo atenda o ambiente 
