@@ -209,4 +209,60 @@ resource "aws_security_group_rule" "allow_all_outbound" {
   autoscaling_group_name = module.webserver_cluster.asg_name
 ```
 
-## Module Versioning
+### Module Versioning
+- podemos versionar o módulo, inserindo o mesmo em um repositorio git, e em seguida gerando um tag para cada modificação
+```
+module "webserver_cluster" {
+  source = "github.com/fabriciolfj/modules//services/webserver-cluster?ref=1.0.0"
+```
+
+### Expressões uteis dentro do terraform
+- count -> uso similar ao for
+  - pode gerar problemas ao remover algum item no meio da matriz
+  - nao podemos utilizar em módulos embutidos
+- for_each -> percorre listas, conjuntos ou maps.
+  - retorna um each.value e each.key
+  - preferivel sobre o count
+```
+resource "aws_iam_user" "example" {
+  for_each = toset(var.user_names) #converte em uma lista
+  name = each.value
+}
+```
+- exemplo de uso em módulos embutidos, no caso para geração de tags
+```
+  dynamic "tag" {
+    for_each = var.custom_tags
+    content {
+      key = tag.key
+      value = tag.value
+      propagate_at_launch = true
+    }
+  }
+```
+
+### Interpolação de strings e diretivas de strings
+- interpolação nos permite fazer referência do código terraform dentro de strings
+```
+"hello, ${var.name}
+```
+- diretivas de string permite fazer uso de instruções de controle (como if por exemplo), mas a sintexe é essa:
+```
+&{...}
+```
+- exemplo:
+```
+value = "%{ for i, name in var.user_names } ${i} ${name}, %{ endfor }"
+```
+
+### Uso condicional para geração de recursos
+- caso queria criar um recurso, diante uma condição, podemos combinar count com if ternário.
+- no exemplo abaixo, definimos uma variavel booleana, caso true count recebe 1, ou seja, será criado um recurso
+- caso false, recebe 0, e não será criado o recurso
+```
+resource "aws_autoscaling_schedule" "scale_out_during_business_hours" {
+  count = var.enable_autoscaling ? 1 : 0
+  scheduled_action_name = "scale-out-during-business-hours"
+```
+
+### Condicionais
